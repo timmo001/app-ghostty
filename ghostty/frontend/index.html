@@ -4,7 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ghostty Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        /* Material 3 Dark Theme - Home Assistant aligned */
+        --md-sys-color-surface: #1c1c1e;
+        --md-sys-color-surface-container: #2c2c2e;
+        --md-sys-color-surface-container-high: #3a3a3c;
+        --md-sys-color-on-surface: #e1e1e1;
+        --md-sys-color-on-surface-variant: #8e8e93;
+        --md-sys-color-outline: #48484a;
+        --md-sys-color-primary: #03a9f4;
+        --md-sys-color-error: #f2555a;
+        --md-sys-color-success: #4caf50;
+        --md-sys-color-warning: #ff9800;
+
+        /* Terminal colors */
+        --terminal-bg: #1e1e1e;
+      }
+
       * {
         margin: 0;
         padding: 0;
@@ -16,83 +39,221 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: #1e1e1e;
+        background: var(--md-sys-color-surface);
+        font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
       }
 
-      #terminal {
+      .terminal-window {
+        display: flex;
+        flex-direction: column;
         width: 100%;
         height: 100%;
-        padding: 8px;
+        max-width: 1400px;
+        max-height: 900px;
+        margin: auto;
+        background: var(--md-sys-color-surface-container);
+        border-radius: 16px;
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.4),
+          0 2px 8px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
       }
 
-      #terminal canvas {
-        display: block;
+      /* Fullscreen mode - no rounded corners or max dimensions */
+      @media (max-width: 1440px), (max-height: 940px) {
+        .terminal-window {
+          max-width: none;
+          max-height: none;
+          border-radius: 0;
+          box-shadow: none;
+        }
       }
 
-      /* Connection status overlay */
-      .status-overlay {
-        position: fixed;
-        top: 8px;
-        right: 8px;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 12px;
-        z-index: 1000;
+      /* Title bar */
+      .title-bar {
         display: flex;
         align-items: center;
-        gap: 6px;
-        opacity: 0.8;
-        transition: opacity 0.3s;
+        height: 48px;
+        padding: 0 16px;
+        background: var(--md-sys-color-surface-container);
+        border-bottom: 1px solid var(--md-sys-color-outline);
+        user-select: none;
+        flex-shrink: 0;
       }
 
-      .status-overlay:hover {
-        opacity: 1;
+      .window-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
 
-      .status-overlay.connected {
-        background: rgba(39, 201, 63, 0.2);
-        color: #27c93f;
+      .window-control {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: none;
+        cursor: default;
+        transition: opacity 0.15s ease;
       }
 
-      .status-overlay.disconnected {
-        background: rgba(255, 95, 86, 0.2);
-        color: #ff5f56;
+      .window-control.close {
+        background: var(--md-sys-color-error);
       }
 
-      .status-overlay.connecting {
-        background: rgba(255, 189, 46, 0.2);
-        color: #ffbd2e;
+      .window-control.minimize {
+        background: var(--md-sys-color-warning);
       }
 
-      .status-dot {
+      .window-control.maximize {
+        background: var(--md-sys-color-success);
+      }
+
+      .title-bar:not(:hover) .window-control {
+        opacity: 0.7;
+      }
+
+      .title {
+        flex: 1;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--md-sys-color-on-surface);
+        letter-spacing: 0.1px;
+      }
+
+      .title-icon {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        vertical-align: middle;
+        opacity: 0.9;
+      }
+
+      /* Connection status */
+      .connection-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.4px;
+        transition: all 0.2s ease;
+      }
+
+      .connection-status.connected {
+        color: var(--md-sys-color-success);
+        background: rgba(76, 175, 80, 0.12);
+      }
+
+      .connection-status.disconnected {
+        color: var(--md-sys-color-error);
+        background: rgba(242, 85, 90, 0.12);
+      }
+
+      .connection-status.connecting {
+        color: var(--md-sys-color-warning);
+        background: rgba(255, 152, 0, 0.12);
+      }
+
+      .status-indicator {
         width: 8px;
         height: 8px;
         border-radius: 50%;
         background: currentColor;
       }
 
-      .status-overlay.connecting .status-dot {
-        animation: pulse 1s infinite;
+      .connection-status.connecting .status-indicator {
+        animation: pulse 1.2s ease-in-out infinite;
       }
 
       @keyframes pulse {
         0%,
         100% {
           opacity: 1;
+          transform: scale(1);
         }
         50% {
-          opacity: 0.4;
+          opacity: 0.5;
+          transform: scale(0.9);
         }
+      }
+
+      /* Terminal container */
+      .terminal-container {
+        flex: 1;
+        background: var(--terminal-bg);
+        padding: 12px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      #terminal {
+        width: 100%;
+        height: 100%;
+      }
+
+      #terminal canvas {
+        display: block;
+      }
+
+      /* Focus ring for accessibility */
+      .terminal-container:focus-within {
+        outline: none;
+      }
+
+      /* Scrollbar styling */
+      .terminal-container ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .terminal-container ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .terminal-container ::-webkit-scrollbar-thumb {
+        background: var(--md-sys-color-surface-container-high);
+        border-radius: 4px;
+      }
+
+      .terminal-container ::-webkit-scrollbar-thumb:hover {
+        background: var(--md-sys-color-outline);
       }
     </style>
   </head>
   <body>
-    <div class="status-overlay connecting" id="status">
-      <div class="status-dot"></div>
-      <span id="status-text">Connecting...</span>
+    <div class="terminal-window">
+      <div class="title-bar">
+        <div class="window-controls">
+          <div class="window-control close"></div>
+          <div class="window-control minimize"></div>
+          <div class="window-control maximize"></div>
+        </div>
+        <div class="title">
+          <svg
+            class="title-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          Ghostty Terminal
+        </div>
+        <div class="connection-status connecting" id="status">
+          <div class="status-indicator"></div>
+          <span id="status-text">Connecting</span>
+        </div>
+      </div>
+      <div class="terminal-container">
+        <div id="terminal"></div>
+      </div>
     </div>
-    <div id="terminal"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

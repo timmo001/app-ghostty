@@ -20,7 +20,7 @@ let reconnectTimeout = null;
  * Update connection status UI
  */
 function setStatus(state, text) {
-  statusOverlay.className = `status-overlay ${state}`;
+  statusOverlay.className = `connection-status ${state}`;
   statusText.textContent = text;
 }
 
