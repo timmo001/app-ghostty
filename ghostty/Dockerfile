@@ -34,6 +34,10 @@ RUN \
         wget \
         net-tools \
         procps \
+        fzf \
+        bat \
+        fd-find \
+        ripgrep \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     \
@@ -42,6 +46,22 @@ RUN \
     && chmod a+x /usr/bin/ha \
     \
     && rm -f -r /etc/nginx
+
+# Install shell enhancements (starship, zoxide, eza)
+ARG EZA_VERSION="0.20.14"
+RUN \
+    curl -fsSL https://starship.rs/install.sh | sh -s -- --yes \
+    && curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh \
+    && case "${BUILD_ARCH}" in \
+        "amd64") EZA_ARCH="x86_64-unknown-linux-gnu" ;; \
+        "aarch64") EZA_ARCH="aarch64-unknown-linux-gnu" ;; \
+        "armv7") EZA_ARCH="armv7-unknown-linux-gnueabihf" ;; \
+        "armhf") EZA_ARCH="armv7-unknown-linux-gnueabihf" ;; \
+        *) echo "Unsupported architecture: ${BUILD_ARCH}" && exit 1 ;; \
+    esac \
+    && curl -fsSL "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_${EZA_ARCH}.tar.gz" \
+        | tar -xz -C /usr/local/bin \
+    && chmod +x /usr/local/bin/eza
 
 # Copy root file system
 COPY rootfs /
