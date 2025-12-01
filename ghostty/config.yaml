@@ -7,7 +7,7 @@ url: https://github.com/timmo001/addon-ghostty
 init: false
 ingress: true
 ingress_stream: true
-panel_icon: mdi:text-box-outline
+panel_icon: mdi:console
 homeassistant: 2025.11.0
 arch:
   - aarch64
