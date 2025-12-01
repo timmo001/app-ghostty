@@ -71,19 +71,19 @@
       "type": "command",
       "key": "│  CPU",
       "keyColor": "green",
-      "text": "lscpu 2>/dev/null | grep -E '^Model name|^Architecture' | head -1 | sed 's/^[^:]*: *//' || grep -m1 'model name' /proc/cpuinfo 2>/dev/null | sed 's/^[^:]*: *//' || echo 'N/A'"
+      "text": "lscpu 2>/dev/null | grep -m1 '^Model name' | sed 's/^[^:]*: *//' || lscpu 2>/dev/null | grep -m1 '^Architecture' | sed 's/^[^:]*: *//' || grep -m1 'model name' /proc/cpuinfo 2>/dev/null | sed 's/^[^:]*: *//' || echo 'N/A'"
     },
     {
       "type": "command",
       "key": "│  Memory",
       "keyColor": "green",
-      "text": "awk '/MemTotal/ {printf \"%.1f GB\", $2/1024/1024}' /proc/meminfo 2>/dev/null || echo 'N/A'"
+      "text": "output=$(awk '/MemTotal/ {printf \"%.1f GB\", $2/1024/1024; exit}' /proc/meminfo 2>/dev/null); [ -n \"$output\" ] && echo \"$output\" || echo 'N/A'"
     },
     {
       "type": "command",
       "key": "│ 󰋊 Disk",
       "keyColor": "green",
-      "text": "df -h / 2>/dev/null | awk 'NR==2 {printf \"%s total, %s used\", $2, $3}' || echo 'N/A'"
+      "text": "output=$(df -h / 2>/dev/null | awk 'NR==2 {printf \"%s total, %s used\", $2, $3; exit}'); [ -n \"$output\" ] && echo \"$output\" || echo 'N/A'"
     },
     {
       "type": "custom",
