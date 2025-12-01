@@ -18,6 +18,15 @@ const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 4277;
 const SHELL = process.env.SHELL || '/bin/bash';
 
+// Global error handlers to prevent crashes
+process.on('uncaughtException', (err) => {
+  console.error('[Server] Uncaught exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Server] Unhandled rejection at:', promise, 'reason:', reason);
+});
+
 // Track active PTY sessions
 const sessions = new Map();
 
@@ -61,65 +70,99 @@ function createPtySession(cols, rows) {
  * Handle WebSocket connection
  */
 function handleConnection(ws, req) {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const cols = parseInt(url.searchParams.get('cols') || '80', 10);
-  const rows = parseInt(url.searchParams.get('rows') || '24', 10);
+  try {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const cols = parseInt(url.searchParams.get('cols') || '80', 10);
+    const rows = parseInt(url.searchParams.get('rows') || '24', 10);
 
-  console.log(`[PTY] New connection: ${cols}x${rows}`);
+    console.log(`[PTY] New connection: ${cols}x${rows}`);
 
-  // Create PTY session
-  const ptyProcess = createPtySession(cols, rows);
-  sessions.set(ws, { pty: ptyProcess });
-
-  // PTY -> WebSocket
-  ptyProcess.onData((data) => {
-    if (ws.readyState === ws.OPEN) {
-      ws.send(data);
-    }
-  });
-
-  ptyProcess.onExit(({ exitCode }) => {
-    console.log(`[PTY] Process exited with code ${exitCode}`);
-    if (ws.readyState === ws.OPEN) {
-      ws.send(`\r\n\x1b[33mShell exited (code: ${exitCode})\x1b[0m\r\n`);
+    // Create PTY session
+    let ptyProcess;
+    try {
+      ptyProcess = createPtySession(cols, rows);
+    } catch (err) {
+      console.error('[PTY] Failed to create PTY:', err);
       ws.close();
+      return;
     }
-  });
 
-  // WebSocket -> PTY
-  ws.on('message', (data) => {
-    const message = data.toString('utf8');
+    sessions.set(ws, { pty: ptyProcess });
 
-    // Check for JSON control messages
-    if (message.startsWith('{')) {
+    // PTY -> WebSocket
+    ptyProcess.onData((data) => {
       try {
-        const msg = JSON.parse(message);
-        if (msg.type === 'resize' && msg.cols && msg.rows) {
-          ptyProcess.resize(msg.cols, msg.rows);
-          console.log(`[PTY] Resized to ${msg.cols}x${msg.rows}`);
-          return;
+        if (ws.readyState === ws.OPEN) {
+          ws.send(data);
         }
-      } catch (e) {
-        // Not JSON, treat as input
+      } catch (err) {
+        console.error('[PTY] Error sending data to WebSocket:', err);
       }
-    }
+    });
 
-    // Send to PTY
-    ptyProcess.write(message);
-  });
-
-  ws.on('close', () => {
-    console.log('[PTY] Connection closed');
-    const session = sessions.get(ws);
-    if (session) {
-      session.pty.kill();
+    ptyProcess.onExit(({ exitCode }) => {
+      console.log(`[PTY] Process exited with code ${exitCode}`);
+      try {
+        if (ws.readyState === ws.OPEN) {
+          ws.send(`\r\n\x1b[33mShell exited (code: ${exitCode})\x1b[0m\r\n`);
+          ws.close();
+        }
+      } catch (err) {
+        console.error('[PTY] Error handling exit:', err);
+      }
       sessions.delete(ws);
-    }
-  });
+    });
 
-  ws.on('error', (err) => {
-    console.error('[PTY] WebSocket error:', err.message);
-  });
+    // WebSocket -> PTY
+    ws.on('message', (data) => {
+      try {
+        const message = data.toString('utf8');
+
+        // Check for JSON control messages
+        if (message.startsWith('{')) {
+          try {
+            const msg = JSON.parse(message);
+            if (msg.type === 'resize' && msg.cols && msg.rows) {
+              ptyProcess.resize(msg.cols, msg.rows);
+              console.log(`[PTY] Resized to ${msg.cols}x${msg.rows}`);
+              return;
+            }
+          } catch (e) {
+            // Not JSON, treat as input
+          }
+        }
+
+        // Send to PTY
+        ptyProcess.write(message);
+      } catch (err) {
+        console.error('[PTY] Error handling message:', err);
+      }
+    });
+
+    ws.on('close', () => {
+      console.log('[PTY] Connection closed');
+      try {
+        const session = sessions.get(ws);
+        if (session) {
+          session.pty.kill();
+          sessions.delete(ws);
+        }
+      } catch (err) {
+        console.error('[PTY] Error cleaning up session:', err);
+      }
+    });
+
+    ws.on('error', (err) => {
+      console.error('[PTY] WebSocket error:', err.message);
+    });
+  } catch (err) {
+    console.error('[PTY] Error in handleConnection:', err);
+    try {
+      ws.close();
+    } catch (e) {
+      // Ignore
+    }
+  }
 }
 
 /**
