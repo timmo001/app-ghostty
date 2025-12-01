@@ -115,10 +115,9 @@ if ! shopt -oq posix; then
 fi
 
 # ============================================================================
-# Welcome message
+# Welcome message (fastfetch)
 # ============================================================================
 
-echo -e "\033[38;2;3;169;244m"
-echo "  Home Assistant Ghostty Terminal"
-echo -e "\033[0m"
-
+if command -v fastfetch &> /dev/null; then
+    fastfetch
+fi

@@ -47,8 +47,9 @@ RUN \
     \
     && rm -f -r /etc/nginx
 
-# Install shell enhancements (starship, zoxide, eza)
+# Install shell enhancements (starship, zoxide, eza, fastfetch)
 ARG EZA_VERSION="0.20.14"
+ARG FASTFETCH_VERSION="2.31.0"
 RUN \
     curl -fsSL https://starship.rs/install.sh | sh -s -- --yes \
     && curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh \
@@ -61,7 +62,20 @@ RUN \
     esac \
     && curl -fsSL "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_${EZA_ARCH}.tar.gz" \
         | tar -xz -C /usr/local/bin \
-    && chmod +x /usr/local/bin/eza
+    && chmod +x /usr/local/bin/eza \
+    \
+    && case "${BUILD_ARCH}" in \
+        "amd64") FASTFETCH_ARCH="linux-amd64" ;; \
+        "aarch64") FASTFETCH_ARCH="linux-aarch64" ;; \
+        "armv7") FASTFETCH_ARCH="linux-armv7l" ;; \
+        "armhf") FASTFETCH_ARCH="linux-armv7l" ;; \
+        *) echo "Unsupported architecture for fastfetch: ${BUILD_ARCH}" && exit 1 ;; \
+    esac \
+    && curl -fsSL "https://github.com/fastfetch-cli/fastfetch/releases/download/${FASTFETCH_VERSION}/fastfetch-${FASTFETCH_ARCH}.tar.gz" \
+        | tar -xz -C /tmp \
+    && cp /tmp/fastfetch-${FASTFETCH_ARCH}/usr/bin/fastfetch /usr/local/bin/ \
+    && chmod +x /usr/local/bin/fastfetch \
+    && rm -rf /tmp/fastfetch-${FASTFETCH_ARCH}
 
 # Copy root file system
 COPY rootfs /
