@@ -4,27 +4,27 @@
  * WebSocket PTY server with Express static file serving
  */
 
-import express from "express";
-import { createServer } from "http";
-import { WebSocketServer } from "ws";
-import pty from "@lydell/node-pty";
-import path from "path";
-import { fileURLToPath } from "url";
+import express from 'express';
+import { createServer } from 'http';
+import { WebSocketServer } from 'ws';
+import pty from '@lydell/node-pty';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuration
 const PORT = process.env.PORT || 4277;
-const SHELL = process.env.SHELL || "/bin/bash";
+const SHELL = process.env.SHELL || '/bin/bash';
 
 // Global error handlers to prevent crashes
-process.on("uncaughtException", (err) => {
-  console.error("[Server] Uncaught exception:", err);
+process.on('uncaughtException', (err) => {
+  console.error('[Server] Uncaught exception:', err);
 });
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("[Server] Unhandled rejection at:", promise, "reason:", reason);
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Server] Unhandled rejection at:', promise, 'reason:', reason);
 });
 
 // Track active PTY sessions
@@ -37,11 +37,11 @@ function createApp() {
   const app = express();
 
   // Serve static frontend files
-  app.use(express.static(path.join(__dirname, "public")));
+  app.use(express.static(path.join(__dirname, 'public')));
 
   // Health check endpoint
-  app.get("/health", (req, res) => {
-    res.json({ status: "ok", sessions: sessions.size });
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', sessions: sessions.size });
   });
 
   return app;
@@ -52,14 +52,14 @@ function createApp() {
  */
 function createPtySession(cols, rows) {
   const ptyProcess = pty.spawn(SHELL, [], {
-    name: "xterm-256color",
+    name: 'xterm-256color',
     cols: cols || 80,
     rows: rows || 24,
-    cwd: process.env.HOME || "/",
+    cwd: process.env.HOME || '/',
     env: {
       ...process.env,
-      TERM: "xterm-256color",
-      COLORTERM: "truecolor",
+      TERM: 'xterm-256color',
+      COLORTERM: 'truecolor',
     },
   });
 
@@ -72,8 +72,8 @@ function createPtySession(cols, rows) {
 function handleConnection(ws, req) {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
-    const cols = parseInt(url.searchParams.get("cols") || "80", 10);
-    const rows = parseInt(url.searchParams.get("rows") || "24", 10);
+    const cols = parseInt(url.searchParams.get('cols') || '80', 10);
+    const rows = parseInt(url.searchParams.get('rows') || '24', 10);
 
     console.log(`[PTY] New connection: ${cols}x${rows}`);
 
@@ -82,7 +82,7 @@ function handleConnection(ws, req) {
     try {
       ptyProcess = createPtySession(cols, rows);
     } catch (err) {
-      console.error("[PTY] Failed to create PTY:", err);
+      console.error('[PTY] Failed to create PTY:', err);
       ws.close();
       return;
     }
@@ -96,7 +96,7 @@ function handleConnection(ws, req) {
           ws.send(data);
         }
       } catch (err) {
-        console.error("[PTY] Error sending data to WebSocket:", err);
+        console.error('[PTY] Error sending data to WebSocket:', err);
       }
     });
 
@@ -108,21 +108,21 @@ function handleConnection(ws, req) {
           ws.close();
         }
       } catch (err) {
-        console.error("[PTY] Error handling exit:", err);
+        console.error('[PTY] Error handling exit:', err);
       }
       sessions.delete(ws);
     });
 
     // WebSocket -> PTY
-    ws.on("message", (data) => {
+    ws.on('message', (data) => {
       try {
-        const message = data.toString("utf8");
+        const message = data.toString('utf8');
 
         // Check for JSON control messages
-        if (message.startsWith("{")) {
+        if (message.startsWith('{')) {
           try {
             const msg = JSON.parse(message);
-            if (msg.type === "resize" && msg.cols && msg.rows) {
+            if (msg.type === 'resize' && msg.cols && msg.rows) {
               ptyProcess.resize(msg.cols, msg.rows);
               console.log(`[PTY] Resized to ${msg.cols}x${msg.rows}`);
               return;
@@ -135,12 +135,12 @@ function handleConnection(ws, req) {
         // Send to PTY
         ptyProcess.write(message);
       } catch (err) {
-        console.error("[PTY] Error handling message:", err);
+        console.error('[PTY] Error handling message:', err);
       }
     });
 
-    ws.on("close", () => {
-      console.log("[PTY] Connection closed");
+    ws.on('close', () => {
+      console.log('[PTY] Connection closed');
       try {
         const session = sessions.get(ws);
         if (session) {
@@ -148,15 +148,15 @@ function handleConnection(ws, req) {
           sessions.delete(ws);
         }
       } catch (err) {
-        console.error("[PTY] Error cleaning up session:", err);
+        console.error('[PTY] Error cleaning up session:', err);
       }
     });
 
-    ws.on("error", (err) => {
-      console.error("[PTY] WebSocket error:", err.message);
+    ws.on('error', (err) => {
+      console.error('[PTY] WebSocket error:', err.message);
     });
   } catch (err) {
-    console.error("[PTY] Error in handleConnection:", err);
+    console.error('[PTY] Error in handleConnection:', err);
     try {
       ws.close();
     } catch (e) {
@@ -169,7 +169,7 @@ function handleConnection(ws, req) {
  * Graceful shutdown
  */
 function shutdown(server, wss) {
-  console.log("\n[Server] Shutting down...");
+  console.log('\n[Server] Shutting down...');
 
   // Kill all PTY sessions
   for (const [ws, session] of sessions.entries()) {
@@ -181,13 +181,13 @@ function shutdown(server, wss) {
   // Close servers
   wss.close();
   server.close(() => {
-    console.log("[Server] Shutdown complete");
+    console.log('[Server] Shutdown complete');
     process.exit(0);
   });
 
   // Force exit after timeout
   setTimeout(() => {
-    console.log("[Server] Forcing exit");
+    console.log('[Server] Forcing exit');
     process.exit(1);
   }, 5000);
 }
@@ -198,13 +198,13 @@ function shutdown(server, wss) {
 function main() {
   const app = createApp();
   const server = createServer(app);
-  const wss = new WebSocketServer({ server, path: "/ws" });
+  const wss = new WebSocketServer({ server, path: '/ws' });
 
-  wss.on("connection", handleConnection);
+  wss.on('connection', handleConnection);
 
   // Handle shutdown signals
-  process.on("SIGTERM", () => shutdown(server, wss));
-  process.on("SIGINT", () => shutdown(server, wss));
+  process.on('SIGTERM', () => shutdown(server, wss));
+  process.on('SIGINT', () => shutdown(server, wss));
 
   server.listen(PORT, () => {
     console.log(`[Server] Ghostty terminal server listening on port ${PORT}`);
