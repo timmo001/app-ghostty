@@ -18,6 +18,13 @@
     },
     "break",
     {
+      "type": "command",
+      "key": "   Addon",
+      "keyColor": "cyan",
+      "text": "ha addons info self --raw-json 2>/dev/null | jq -r '.data.version // empty' || echo 'N/A'"
+    },
+    "break",
+    {
       "type": "custom",
       "format": "\u001b[90m┌────────────────────System Info─────────────────────┐"
     },
