@@ -76,7 +76,7 @@
       "type": "command",
       "key": "│ 󰏖 Addons",
       "keyColor": "yellow",
-      "text": "ha addons --raw-json 2>/dev/null | jq -r '[.data.addons[] | select(.installed == true)] | length' || echo 'N/A'"
+      "text": "ha addons --raw-json 2>/dev/null | jq -r '[.data.addons[] | select(.installed != null and .installed != \"\")] | length' || echo 'N/A'"
     },
     {
       "type": "command",
