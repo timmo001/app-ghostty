@@ -1,6 +1,0 @@
-[submodule "ghostty/ghostty-web"]
-	path = ghostty/ghostty-web
-	url = git@github.com:coder/ghostty-web.git
-[submodule "ghostty/rootfs/opt/ghostty-web"]
-	path = ghostty/rootfs/opt/ghostty-web
-	url = git@github.com:coder/ghostty-web.git
