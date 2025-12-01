@@ -17,14 +17,35 @@ hassio_api: true
 hassio_role: manager
 homeassistant_api: true
 auth_api: true
+host_network: true
+docker_api: true
+journald: true
+host_dbus: true
+uart: true
+usb: true
+gpio: true
+audio: true
+apparmor: false
+privileged:
+  - NET_ADMIN
+  - SYS_ADMIN
+  - SYS_RAWIO
+  - SYS_TIME
+  - SYS_NICE
+devices:
+  - /dev/mem
 ports:
   80/tcp: null
 ports_description:
   80/tcp: Web interface (Not required for Ingress)
 map:
-  - homeassistant_config
-  - share
-  - ssl
+  - addons:rw
+  - all_addon_configs:rw
+  - backup:rw
+  - homeassistant_config:rw
+  - media:rw
+  - share:rw
+  - ssl:rw
 options:
   ssl: true
   certfile: fullchain.pem

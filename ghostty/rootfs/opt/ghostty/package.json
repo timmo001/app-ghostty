@@ -1,0 +1,12 @@
+{
+  "name": "ghostty-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0",
+    "@lydell/node-pty": "^1.1.0"
+  }
+}
+

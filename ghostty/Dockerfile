@@ -7,11 +7,22 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install requirements for add-on
 ARG BUILD_ARCH=amd64
-ARG HA_CLI_VERSION="4.41.0"
+ARG HA_CLI_VERSION="4.43.0"
 
 RUN \
     apk add --no-cache \
         nginx=1.24.0-r16 \
+        gcompat \
+        bash-completion \
+        zsh \
+        vim \
+        htop \
+        git \
+        nano \
+        tmux \
+        curl \
+        wget \
+        net-tools \
     \
     && curl -L -s -o /usr/bin/ha \
         "https://github.com/home-assistant/cli/releases/download/${HA_CLI_VERSION}/ha_${BUILD_ARCH}" \
