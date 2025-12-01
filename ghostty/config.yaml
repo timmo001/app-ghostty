@@ -3,7 +3,7 @@ name: Ghostty
 version: dev
 slug: ghostty
 description: Browser-based terminal emulator using Ghostty.
-url: https://github.com/hassio-addons/addon-ghostty
+url: https://github.com/timmo001/addon-ghostty
 init: false
 ingress: true
 ingress_stream: true
