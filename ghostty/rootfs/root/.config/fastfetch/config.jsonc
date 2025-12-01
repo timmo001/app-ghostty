@@ -23,25 +23,25 @@
     },
     {
       "type": "command",
-      "key": "│  Hostname",
+      "key": "│ 󰟀 Hostname",
       "keyColor": "cyan",
       "text": "ha host info --raw-json 2>/dev/null | jq -r '.data.hostname // empty' || echo 'N/A'"
     },
     {
       "type": "command",
-      "key": "│  OS",
+      "key": "│ 󰍹 OS",
       "keyColor": "cyan",
       "text": "ha host info --raw-json 2>/dev/null | jq -r '.data.operating_system // empty' || echo 'N/A'"
     },
     {
       "type": "command",
-      "key": "│  Kernel",
+      "key": "│ 󰌢 Kernel",
       "keyColor": "cyan",
       "text": "ha host info --raw-json 2>/dev/null | jq -r '.data.kernel // empty' || echo 'N/A'"
     },
     {
       "type": "command",
-      "key": "│  Core",
+      "key": "│ 󰟰 Core",
       "keyColor": "cyan",
       "text": "ha core info --raw-json 2>/dev/null | jq -r '.data.version // empty' || echo 'N/A'"
     },
@@ -62,13 +62,13 @@
     },
     {
       "type": "command",
-      "key": "│  CPU",
+      "key": "│ 󰻠 CPU",
       "keyColor": "green",
       "text": "lscpu 2>/dev/null | grep -m1 '^Model name' | sed 's/^[^:]*: *//' || lscpu 2>/dev/null | grep -m1 '^Architecture' | sed 's/^[^:]*: *//' || grep -m1 'model name' /proc/cpuinfo 2>/dev/null | sed 's/^[^:]*: *//' || echo 'N/A'"
     },
     {
       "type": "command",
-      "key": "│  Memory",
+      "key": "│ 󰍛 Memory",
       "keyColor": "green",
       "text": "output=$(awk '/MemTotal/ {printf \"%.1f GB\", $2/1024/1024; exit}' /proc/meminfo 2>/dev/null); [ -n \"$output\" ] && echo \"$output\" || echo 'N/A'"
     },
