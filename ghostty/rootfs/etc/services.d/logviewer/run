@@ -1,0 +1,7 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Home Assistant Ghostty Add-on
+# Runs the Ghostty
+# ==============================================================================
+bashio::log.info "Starting Ghostty..."
+exec node /opt/ghostty/server.js

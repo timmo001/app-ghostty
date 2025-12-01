@@ -1,0 +1,8 @@
+# Frontend node_modules
+frontend/node_modules/
+
+# Vite build output (generated during Docker build)
+rootfs/opt/ghostty/public/*.html
+rootfs/opt/ghostty/public/*.js
+rootfs/opt/ghostty/public/*.ico
+rootfs/opt/ghostty/public/assets/

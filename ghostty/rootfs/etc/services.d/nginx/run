@@ -1,0 +1,11 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Home Assistant Ghostty Add-on
+# Runs the NGINX daemon
+# ==============================================================================
+
+# Wait for the Ghostty to become available
+bashio::net.wait_for 4277
+
+bashio::log.info "Starting NGINX..."
+exec nginx
