@@ -7,7 +7,7 @@ import { init, Terminal, FitAddon } from 'ghostty-web';
 
 // DOM elements
 const terminalContainer = document.getElementById('terminal');
-const statusDot = document.getElementById('status-dot');
+const statusOverlay = document.getElementById('status');
 const statusText = document.getElementById('status-text');
 
 // State
@@ -20,7 +20,7 @@ let reconnectTimeout = null;
  * Update connection status UI
  */
 function setStatus(state, text) {
-  statusDot.className = `status-dot ${state}`;
+  statusOverlay.className = `status-overlay ${state}`;
   statusText.textContent = text;
 }
 
