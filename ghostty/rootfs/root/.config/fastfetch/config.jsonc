@@ -58,6 +58,39 @@
     "break",
     {
       "type": "custom",
+      "format": "\u001b[90m┌───────────────Home Assistant Info─────────────────┐"
+    },
+    {
+      "type": "command",
+      "key": "│ 󰟰 Supervisor",
+      "keyColor": "yellow",
+      "text": "ha supervisor info --raw-json 2>/dev/null | jq -r '.data.version // empty' || echo 'N/A'"
+    },
+    {
+      "type": "command",
+      "key": "│ 󰍹 HA OS",
+      "keyColor": "yellow",
+      "text": "ha os info --raw-json 2>/dev/null | jq -r '.data.version // empty' || echo 'N/A'"
+    },
+    {
+      "type": "command",
+      "key": "│ 󰏖 Addons",
+      "keyColor": "yellow",
+      "text": "ha addons --raw-json 2>/dev/null | jq -r '[.data.addons[] | select(.installed == true)] | length' || echo 'N/A'"
+    },
+    {
+      "type": "command",
+      "key": "│ 󰄨 State",
+      "keyColor": "yellow",
+      "text": "ha supervisor info --raw-json 2>/dev/null | jq -r '.data.state // empty' || echo 'N/A'"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[90m└────────────────────────────────────────────────────┘"
+    },
+    "break",
+    {
+      "type": "custom",
       "format": "\u001b[90m┌──────────────────────Hardware──────────────────────┐"
     },
     {
@@ -92,6 +125,12 @@
       "key": "│ 󰈀 IP",
       "keyColor": "blue",
       "text": "ha network info --raw-json 2>/dev/null | jq -r '.data.interfaces[0].ipv4.address[0] // empty' | cut -d'/' -f1 || echo 'N/A'"
+    },
+    {
+      "type": "command",
+      "key": "│ 󰤨 Interface",
+      "keyColor": "blue",
+      "text": "ha network info --raw-json 2>/dev/null | jq -r '.data.interfaces[0].interface // empty' || echo 'N/A'"
     },
     {
       "type": "custom",
