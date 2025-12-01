@@ -36,7 +36,17 @@ function getWebSocketUrl() {
   const cols = term?.cols || 80;
   const rows = term?.rows || 24;
   
-  return `${protocol}//${host}/ws?cols=${cols}&rows=${rows}`;
+  // For ingress, we need to use the current path as base
+  // URL looks like: /api/hassio_ingress/<token>/
+  // WebSocket should be: /api/hassio_ingress/<token>/ws
+  let basePath = window.location.pathname;
+  
+  // Ensure basePath ends without trailing slash for clean concatenation
+  if (basePath.endsWith('/')) {
+    basePath = basePath.slice(0, -1);
+  }
+  
+  return `${protocol}//${host}${basePath}/ws?cols=${cols}&rows=${rows}`;
 }
 
 /**
