@@ -3,12 +3,12 @@
  * Initializes ghostty-web terminal with WebSocket PTY connection
  */
 
-import { init, Terminal, FitAddon } from 'ghostty-web';
+import { init, Terminal, FitAddon } from "ghostty-web";
 
 // DOM elements
-const terminalContainer = document.getElementById('terminal');
-const statusDot = document.getElementById('status-dot');
-const statusText = document.getElementById('status-text');
+const terminalContainer = document.getElementById("terminal");
+const statusOverlay = document.getElementById("status");
+const statusText = document.getElementById("status-text");
 
 // State
 let term = null;
@@ -20,7 +20,7 @@ let reconnectTimeout = null;
  * Update connection status UI
  */
 function setStatus(state, text) {
-  statusDot.className = `status-dot ${state}`;
+  statusOverlay.className = `status-overlay ${state}`;
   statusText.textContent = text;
 }
 
@@ -29,23 +29,23 @@ function setStatus(state, text) {
  * Handles both direct access and Home Assistant ingress
  */
 function getWebSocketUrl() {
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const host = window.location.host;
-  
+
   // Get terminal dimensions
   const cols = term?.cols || 80;
   const rows = term?.rows || 24;
-  
+
   // For ingress, we need to use the current path as base
   // URL looks like: /api/hassio_ingress/<token>/
   // WebSocket should be: /api/hassio_ingress/<token>/ws
   let basePath = window.location.pathname;
-  
+
   // Ensure basePath ends without trailing slash for clean concatenation
-  if (basePath.endsWith('/')) {
+  if (basePath.endsWith("/")) {
     basePath = basePath.slice(0, -1);
   }
-  
+
   return `${protocol}//${host}${basePath}/ws?cols=${cols}&rows=${rows}`;
 }
 
@@ -57,14 +57,14 @@ function connect() {
     return;
   }
 
-  setStatus('connecting', 'Connecting...');
-  
+  setStatus("connecting", "Connecting...");
+
   const wsUrl = getWebSocketUrl();
   ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
-    setStatus('connected', 'Connected');
-    
+    setStatus("connected", "Connected");
+
     // Clear any pending reconnect
     if (reconnectTimeout) {
       clearTimeout(reconnectTimeout);
@@ -77,9 +77,9 @@ function connect() {
   };
 
   ws.onclose = () => {
-    setStatus('disconnected', 'Disconnected');
+    setStatus("disconnected", "Disconnected");
     ws = null;
-    
+
     // Attempt to reconnect after delay
     if (!reconnectTimeout) {
       reconnectTimeout = setTimeout(() => {
@@ -90,7 +90,7 @@ function connect() {
   };
 
   ws.onerror = () => {
-    setStatus('disconnected', 'Connection error');
+    setStatus("disconnected", "Connection error");
   };
 }
 
@@ -99,7 +99,7 @@ function connect() {
  */
 function sendResize(cols, rows) {
   if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'resize', cols, rows }));
+    ws.send(JSON.stringify({ type: "resize", cols, rows }));
   }
 }
 
@@ -116,28 +116,28 @@ async function initTerminal() {
     rows: 24,
     cursorBlink: true,
     fontSize: 14,
-    fontFamily: 'JetBrains Mono, Menlo, Monaco, Consolas, monospace',
+    fontFamily: "JetBrains Mono, Menlo, Monaco, Consolas, monospace",
     theme: {
-      background: '#1e1e1e',
-      foreground: '#d4d4d4',
-      cursor: '#d4d4d4',
-      cursorAccent: '#1e1e1e',
-      black: '#1e1e1e',
-      red: '#f44747',
-      green: '#6a9955',
-      yellow: '#dcdcaa',
-      blue: '#569cd6',
-      magenta: '#c586c0',
-      cyan: '#4ec9b0',
-      white: '#d4d4d4',
-      brightBlack: '#808080',
-      brightRed: '#f44747',
-      brightGreen: '#6a9955',
-      brightYellow: '#dcdcaa',
-      brightBlue: '#569cd6',
-      brightMagenta: '#c586c0',
-      brightCyan: '#4ec9b0',
-      brightWhite: '#ffffff',
+      background: "#1e1e1e",
+      foreground: "#d4d4d4",
+      cursor: "#d4d4d4",
+      cursorAccent: "#1e1e1e",
+      black: "#1e1e1e",
+      red: "#f44747",
+      green: "#6a9955",
+      yellow: "#dcdcaa",
+      blue: "#569cd6",
+      magenta: "#c586c0",
+      cyan: "#4ec9b0",
+      white: "#d4d4d4",
+      brightBlack: "#808080",
+      brightRed: "#f44747",
+      brightGreen: "#6a9955",
+      brightYellow: "#dcdcaa",
+      brightBlue: "#569cd6",
+      brightMagenta: "#c586c0",
+      brightCyan: "#4ec9b0",
+      brightWhite: "#ffffff",
     },
     scrollback: 10000,
   });
@@ -164,7 +164,7 @@ async function initTerminal() {
   });
 
   // Handle window resize
-  window.addEventListener('resize', () => {
+  window.addEventListener("resize", () => {
     fitAddon.fit();
   });
 
@@ -174,7 +174,6 @@ async function initTerminal() {
 
 // Initialize on load
 initTerminal().catch((err) => {
-  console.error('Failed to initialize terminal:', err);
-  setStatus('disconnected', 'Initialization failed');
+  console.error("Failed to initialize terminal:", err);
+  setStatus("disconnected", "Initialization failed");
 });
-
