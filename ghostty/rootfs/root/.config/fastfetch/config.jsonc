@@ -22,24 +22,34 @@
       "format": "\u001b[90m┌────────────────────System Info─────────────────────┐"
     },
     {
-      "type": "host",
-      "key": "│  Host",
-      "keyColor": "cyan"
+      "type": "command",
+      "key": "│  Hostname",
+      "keyColor": "cyan",
+      "text": "ha host info --raw-json 2>/dev/null | jq -r '.data.hostname // empty' || echo 'N/A'"
     },
     {
-      "type": "os",
+      "type": "command",
       "key": "│  OS",
-      "keyColor": "cyan"
+      "keyColor": "cyan",
+      "text": "ha host info --raw-json 2>/dev/null | jq -r '.data.operating_system // empty' || echo 'N/A'"
     },
     {
-      "type": "kernel",
+      "type": "command",
       "key": "│  Kernel",
-      "keyColor": "cyan"
+      "keyColor": "cyan",
+      "text": "ha host info --raw-json 2>/dev/null | jq -r '.data.kernel // empty' || echo 'N/A'"
     },
     {
-      "type": "uptime",
+      "type": "command",
+      "key": "│  Core",
+      "keyColor": "cyan",
+      "text": "ha core info --raw-json 2>/dev/null | jq -r '.data.version // empty' || echo 'N/A'"
+    },
+    {
+      "type": "command",
       "key": "│ 󰅐 Uptime",
-      "keyColor": "cyan"
+      "keyColor": "cyan",
+      "text": "ha host info --raw-json 2>/dev/null | jq -r '.data.boot_timestamp // empty' | xargs -I {} date -d {} '+%s' 2>/dev/null | xargs -I {} bash -c 'echo $(( ($(date +%s) - {}) / 86400 ))d $(( (($(date +%s) - {}) % 86400) / 3600 ))h $(( (($(date +%s) - {}) % 3600) / 60 ))m' || echo 'N/A'"
     },
     {
       "type": "custom",
@@ -51,20 +61,22 @@
       "format": "\u001b[90m┌──────────────────────Hardware──────────────────────┐"
     },
     {
-      "type": "cpu",
+      "type": "command",
       "key": "│  CPU",
-      "showPeCoreCount": true,
-      "keyColor": "green"
+      "keyColor": "green",
+      "text": "ha host info --raw-json 2>/dev/null | jq -r '.data.cpe // empty' | sed 's/.*://' || echo 'N/A'"
     },
     {
-      "type": "memory",
+      "type": "command",
       "key": "│  Memory",
-      "keyColor": "green"
+      "keyColor": "green",
+      "text": "ha host info --raw-json 2>/dev/null | jq -r '(.data.memory_total // 0) / 1073741824 | floor | tostring + \" GB\"' || echo 'N/A'"
     },
     {
-      "type": "disk",
+      "type": "command",
       "key": "│ 󰋊 Disk",
-      "keyColor": "green"
+      "keyColor": "green",
+      "text": "ha host info --raw-json 2>/dev/null | jq -r '(.data.disk_total // 0) / 1073741824 | floor | tostring + \" GB total, \" + ((.data.disk_used // 0) / 1073741824 | floor | tostring) + \" GB used\"' || echo 'N/A'"
     },
     {
       "type": "custom",
@@ -76,11 +88,10 @@
       "format": "\u001b[90m┌───────────────────────Network──────────────────────┐"
     },
     {
-      "type": "localip",
+      "type": "command",
       "key": "│ 󰈀 IP",
       "keyColor": "blue",
-      "showIpv4": true,
-      "showIpv6": false
+      "text": "ha network info --raw-json 2>/dev/null | jq -r '.data.interfaces[0].ipv4.address[0] // empty' | cut -d'/' -f1 || echo 'N/A'"
     },
     {
       "type": "custom",
@@ -94,4 +105,3 @@
     }
   ]
 }
-
