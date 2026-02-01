@@ -5,7 +5,7 @@ FROM ${BUILD_FROM}
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Install requirements for add-on
+# Install requirements for app
 ARG BUILD_ARCH=amd64
 ARG HA_CLI_VERSION="4.45.0"
 ARG NODE_MAJOR=20
