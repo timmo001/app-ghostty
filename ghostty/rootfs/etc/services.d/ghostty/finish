@@ -1,10 +1,10 @@
 #!/command/with-contenv bashio
 # ==============================================================================
-# Home Assistant Ghostty Add-on
+# Home Assistant Ghostty App
 # Take down the S6 supervision tree when Ghostty fails
 # ==============================================================================
 if [[ "${1}" -ne 0 ]] && [[ "${1}" -ne 256 ]]; then
-  bashio::log.warning "Ghostty crashed, halting add-on"
+  bashio::log.warning "Ghostty crashed, halting app"
   /run/s6/basedir/bin/halt
 fi
 
