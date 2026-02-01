@@ -7,7 +7,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install requirements for add-on
 ARG BUILD_ARCH=amd64
-ARG HA_CLI_VERSION="4.43.0"
+ARG HA_CLI_VERSION="4.45.0"
 ARG NODE_MAJOR=20
 
 # Install Node.js and other dependencies
