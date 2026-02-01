@@ -1,3 +1,3 @@
-# Home Assistant Ghostty Add-on
+# Home Assistant Ghostty App
 
 Browser-based terminal emulator using Ghostty.
