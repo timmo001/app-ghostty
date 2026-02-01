@@ -1,4 +1,4 @@
-# ~/.bashrc - Shell configuration for Ghostty addon
+# ~/.bashrc - Shell configuration for Ghostty app
 
 # If not running interactively, don't do anything
 case $- in
